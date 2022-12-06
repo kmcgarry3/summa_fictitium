@@ -1,15 +1,20 @@
 import os
 import json
+import pandas as pd
 
 filepath = 'summa.json//json//ALL.json'
 with open(filepath) as f:
     data = json.load(f)
 
-# Need something recursive to get all the text
-all_text = []
-for key, value in data.items():
-    print(key)
-    if key == 'title' or key == 'text':
-        all_text.append(value + '\n')
+df = pd.json_normalize(data, sep='_')
+flat_dict = df.to_dict()
 
-print(all_text[0:10])
+# Write all titles and text to a text file
+with open('all_text.txt', 'w') as f:
+    for key, value in flat_dict.items():
+        if 'title' in key or 'text' in key:
+            if str(value[0])[0] is '[':
+                line = str(value[0])[2:-2]
+            else:
+                line = str(value[0])
+            f.write(line + '\n')
