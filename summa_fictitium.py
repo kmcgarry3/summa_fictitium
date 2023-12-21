@@ -9,7 +9,7 @@ from keras.layers import LSTM
 from keras.layers import RNN
 from keras.utils import np_utils
 
-with open('all_text.txt', 'r') as f:
+with open('raw_results/all_text.txt', 'r') as f:
     text = f.read()
 text = text.lower()
 

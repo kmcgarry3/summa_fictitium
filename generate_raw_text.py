@@ -10,7 +10,7 @@ df = pd.json_normalize(data, sep='_')
 flat_dict = df.to_dict()
 
 # Write all titles and text to a text file
-with open('all_text.txt', 'w') as f:
+with open('raw_results/all_text.txt', 'w') as f:
     for key, value in flat_dict.items():
         if ('title' in key or 'text' in key
              or 'counter' in key or 'body' in key
