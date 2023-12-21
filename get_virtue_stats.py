@@ -53,7 +53,7 @@ counts = [
 fig1 = plt.figure()
 plt.minorticks_on()
 plt.grid(which='minor', axis='y', linestyle=':', linewidth='0.5', color='black')
-plt.grid(which='major', axis='y', linestyle='-', linewidth='0.5', color='black')
+plt.grid(which='major', axis='y', linestyle='--', linewidth='0.5', color='black')
 plt.bar(virtues, counts, zorder=2)
 plt.xlabel('Virtue')
 plt.ylabel('Number of Occurences')
