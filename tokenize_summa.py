@@ -1,14 +1,16 @@
-import collections
+from collections import Counter
 import re
 import json
 import nltk
 import nltk.tokenize
-from nltk.corpus import stopwords
-# from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer
+import enchant
 
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
-# nltk.download('wordnet', quiet=True)
+nltk.download('wordnet', quiet=True)
+nltk.download('averaged_perceptron_tagger', quiet=True)
 
 def generate_vocabulary(text_filepath):
 
@@ -18,31 +20,71 @@ def generate_vocabulary(text_filepath):
 
     tokens = nltk.tokenize.word_tokenize(text, language='english')
     punctuation_re = re.compile(r'[^a-zA-Z\s]+$')
-    tokens = [token for token in tokens if not punctuation_re.match(token)]
+    tokens = [
+        token.replace("\\", "").replace("'", "").strip("-")
+        for token in tokens
+        if not punctuation_re.match(token)
+    ]
 
-    # lemmatizer = WordNetLemmatizer()
-    # tokens = [lemmatizer.lemmatize(token) for token in tokens]
+    lemmatizer = WordNetLemmatizer()
+    pos_tags = nltk.pos_tag(tokens)
+    tokens = []
+    for token, pos in pos_tags:
+        lemma = lemmatizer.lemmatize(token, pos=pos[0].lower()) if pos[0].lower() in ['a', 'n', 'v'] else lemmatizer.lemmatize(token)
+        tokens.append(lemma)
 
-    vocabulary = collections.Counter()
+    vocabulary = Counter()
     vocabulary.update(tokens)
     for word in list(vocabulary):
-        if word in stopwords.words('english'):
+        if (word in stopwords.words('english') or
+            not wordnet.synsets(word, lang='eng')):
+            
             del vocabulary[word]
-    # print(vocabulary.most_common(n=10))
-    # print(len([word for word in vocabulary if vocabulary[word] >= 1000]))
 
-    output_filepath = 'raw_results/' + text_filepath.split('/')[-1][:-4] + '_vocabulary.txt'
+    output_filepath = 'raw_results/' + text_filepath.split('/')[-1][:-4] + '_vocabulary.json'
     with open(output_filepath, 'w') as file:
-        json.dump(dict(vocabulary), file)
+        json.dump(dict(vocabulary.most_common()), file)
 
     return vocabulary
 
-def read_vocabulary(text_filepath):
-    with open(text_filepath, 'r') as file:
-        vocabulary = file.read()
+def read_vocabulary(json_filepath):
+    with open(json_filepath, 'r') as file:
+        vocabulary = Counter(json.load(file))
     return vocabulary
 
 
 
-generate_vocabulary('raw_results/all_text.txt')
-new_vocabulary = read_vocabulary('raw_results/all_text_vocabulary.txt')
+# generate_vocabulary('raw_results/all_text.txt')
+vocabulary = read_vocabulary('raw_results/all_text_vocabulary.json')
+print(len(vocabulary))
+
+#print(vocabulary.most_common(n=10))
+#print(len([word for word in vocabulary if vocabulary[word] >= 1000])
+
+
+# # Testing for different word validity methods
+
+# non_eng_words = Counter()
+# spell_check_words = Counter()
+# special_words = Counter()
+# d = enchant.Dict("en_US")
+# for word in vocabulary:
+#     if not wordnet.synsets(word, lang='eng'):
+#         non_eng_words.update(Counter({word: vocabulary[word]}))
+#     if not d.check(word):
+#         spell_check_words.update(Counter({word: vocabulary[word]}))
+#     if not wordnet.synsets(word, lang='eng') and not d.check(word):
+#         special_words.update(Counter({word: vocabulary[word]}))
+
+# print(len(non_eng_words))
+# print(len(spell_check_words))
+# print(len(special_words))
+
+# with open('synsets_words.json', 'w') as file:
+#     json.dump(dict(non_eng_words.most_common()), file)
+
+# with open('spell_check_words.json', 'w') as file:
+#     json.dump(dict(spell_check_words.most_common()), file)
+
+# with open('special_words.json', 'w') as file:
+#     json.dump(dict(special_words.most_common()), file)
