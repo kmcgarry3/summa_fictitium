@@ -7,6 +7,8 @@ from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 import enchant
 
+from helpers import *
+
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 nltk.download('wordnet', quiet=True)
@@ -47,11 +49,6 @@ def generate_vocabulary(text_filepath):
 
     return vocabulary
 
-def read_vocabulary(json_filepath):
-    with open(json_filepath, 'r') as file:
-        vocabulary = Counter(json.load(file))
-    return vocabulary
-
 
 
 # generate_vocabulary('raw_results/all_text.txt')
@@ -80,11 +77,6 @@ print(len(vocabulary))
 # print(len(spell_check_words))
 # print(len(special_words))
 
-# with open('synsets_words.json', 'w') as file:
-#     json.dump(dict(non_eng_words.most_common()), file)
-
-# with open('spell_check_words.json', 'w') as file:
-#     json.dump(dict(spell_check_words.most_common()), file)
-
-# with open('special_words.json', 'w') as file:
-#     json.dump(dict(special_words.most_common()), file)
+# dump_counter_to_json(non_eng_words, 'synsets_words')
+# dump_counter_to_json(spell_check_words, 'spell_check_words')
+# dump_counter_to_json(special_words, 'special_words')
